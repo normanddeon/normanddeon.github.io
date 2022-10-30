@@ -249,7 +249,7 @@ body,html{
 /* media query for main and band section */
 @media screen and (min-width:40rem){
     .band-overview{
-        background:url('./Assets/bg2.jpg') center/cover no-repeat;
+        background:url('./Assets/tsmain.jpg') center/cover no-repeat;
         height: calc(100vh - 52px);
     }
     .band-overview .band-overview__title{
