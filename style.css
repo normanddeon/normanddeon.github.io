@@ -253,8 +253,8 @@ body,html{
         height: calc(100vh - 52px);
     }
     .band-overview .band-overview__title{
-        bottom:5rem;
-        font-size:4rem;
+        bottom:8rem;
+        font-size:8rem;
         margin:2rem auto;
     }
 
@@ -266,7 +266,7 @@ body,html{
         bottom: 5rem;
         left: 0;
         margin:0;
-        font-size: 1.2rem;
+        font-size: 2rem;
     }
 
     .band-overview .scroll-indicator{
