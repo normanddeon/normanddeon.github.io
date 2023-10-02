@@ -527,14 +527,14 @@ img.youtube-thumb {
 	height: auto 
 }
 div.play-button { 
-    height: 72px; 
+    height: 51px; 
 	width: 72px; 
 	left: 50%; 
 	top: 50%; 
 	margin-left: -36px; 
 	margin-top: -36px; 
 	position: absolute; 
-	background: src="./Assets/normand.jpg" no-repeat;
+	background: url('./Assets/ytplay-sm.png') no-repeat;
 	/* background: url("http://i.imgur.com/TxzC70f.png") no-repeat; */
 	
 }
