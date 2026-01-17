@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guitar Chord Diagram Generator</title>
+<style>
+    body {
+        background: #111;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 40px;
+    }
+
+    input, button {
+        font-size: 1rem;
+        padding: 8px;
+        margin-top: 10px;
+    }
+
+    canvas {
+        background: #fff;
+        margin-top: 20px;
+        border-radius: 8px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Guitar Chord Diagram</h1>
+
+<input id="chordInput" placeholder="Enter chord (C, G, Am, D7)">
+<button onclick="drawChord()">Generate</button>
+
+<br>
+<canvas id="chordCanvas" width="400" height="250"></canvas>
+
+<script>
+const chords = {
+
+  /* ================= A ================= */
+  "A":      { frets: [0,2,2,2,0,"x"] },
+  "Am":     { frets: [0,1,2,2,0,"x"] },
+  "Am7":    { frets: [0,1,0,2,0,"x"] },
+  "Amaj7":  { frets: [0,2,1,2,0,"x"] },
+  "A6":     { frets: [0,2,2,2,2,"x"] },
+  "Asus2":  { frets: [0,0,2,2,0,"x"] },
+  "Asus4":  { frets: [0,3,2,2,0,"x"] },
+  "Adim":   { frets: [2,1,2,1,"x","x"] },
+  "Aaug":   { frets: [1,2,2,3,"x","x"] },
+  "A9":     { frets: [0,2,0,2,0,"x"] },
+  "A11":    { frets: [0,0,0,2,0,"x"] },
+  "A7b5":   { frets: [0,1,0,2,"x","x"] },
+
+  /* ================= Bb ================= */
+  "Bb":     { frets: [1,3,3,3,1,1] },
+  "Bbm":    { frets: [1,2,3,3,1,1] },
+  "Bbm7":   { frets: [1,2,1,3,1,1] },
+  "Bbmaj7": { frets: [1,3,2,3,1,1] },
+  "Bb6":    { frets: [1,3,3,3,3,1] },
+  "Bbsus2": { frets: [1,1,3,3,1,1] },
+  "Bbsus4": { frets: [1,4,3,3,1,1] },
+  "Bbdim":  { frets: [1,2,3,2,"x","x"] },
+  "Bbaug":  { frets: [2,3,3,4,"x","x"] },
+  "Bb9":    { frets: [1,3,1,3,1,1] },
+  "Bb11":   { frets: [1,1,1,3,1,1] },
+  "Bb7b5":  { frets: [1,2,1,3,"x","x"] },
+
+  /* ================= B ================= */
+  "B":      { frets: [2,4,4,4,2,"x"] },
+  "Bm":     { frets: [2,3,4,4,2,"x"] },
+  "Bm7":    { frets: [2,3,2,4,2,"x"] },
+  "Bmaj7":  { frets: [2,4,3,4,2,"x"] },
+  "B6":     { frets: [2,4,4,4,4,"x"] },
+  "Bsus2":  { frets: [2,2,4,4,2,"x"] },
+  "Bsus4":  { frets: [2,5,4,4,2,"x"] },
+  "Bdim":   { frets: [2,3,4,3,"x","x"] },
+  "Baug":   { frets: [3,4,4,5,"x","x"] },
+  "B9":     { frets: [2,4,2,4,2,"x"] },
+  "B11":    { frets: [2,2,2,4,2,"x"] },
+  "B7b5":   { frets: [2,3,2,4,"x","x"] },
+
+  /* ================= C ================= */
+  "C":      { frets: [0,1,0,2,3,"x"] },
+  "Cm":     { frets: [3,4,5,5,3,"x"] },
+  "Cm7":    { frets: [3,4,3,5,3,"x"] },
+  "Cmaj7":  { frets: [0,0,0,2,3,"x"] },
+  "C6":     { frets: [0,1,2,2,3,"x"] },
+  "Csus2":  { frets: [0,1,0,0,3,"x"] },
+  "Csus4":  { frets: [1,1,0,3,3,"x"] },
+  "Cdim":   { frets: [2,1,2,1,"x","x"] },
+  "Caug":   { frets: [1,1,0,2,3,"x"] },
+  "C9":     { frets: [0,1,0,2,1,"x"] },
+  "C11":    { frets: [1,1,1,3,3,"x"] },
+  "C7b5":   { frets: [0,1,0,2,2,"x"] },
+
+  /* ================= C# / Db ================= */
+  "C#":      { frets: [1,2,3,3,1,"x"] },
+  "C#m":     { frets: [1,2,3,3,1,"x"] },
+  "C#m7":    { frets: [1,2,1,3,1,"x"] },
+  "C#maj7":  { frets: [1,3,2,3,1,"x"] },
+  "C#6":     { frets: [1,3,3,3,3,"x"] },
+  "C#sus2":  { frets: [1,1,3,3,1,"x"] },
+  "C#sus4":  { frets: [1,4,3,3,1,"x"] },
+  "C#dim":   { frets: [1,2,3,2,"x","x"] },
+  "C#aug":   { frets: [2,3,3,4,"x","x"] },
+  "C#9":     { frets: [1,3,1,3,1,"x"] },
+  "C#11":    { frets: [1,1,1,3,1,"x"] },
+  "C#7b5":   { frets: [1,2,1,3,"x","x"] },
+
+  /* ================= D ================= */
+  "D":      { frets: [2,3,2,0,"x","x"] },
+  "Dm":     { frets: [1,3,2,0,"x","x"] },
+  "Dm7":    { frets: [1,1,2,0,"x","x"] },
+  "Dmaj7":  { frets: [2,2,2,0,"x","x"] },
+  "D6":     { frets: [2,0,2,0,"x","x"] },
+  "Dsus2":  { frets: [0,3,2,0,"x","x"] },
+  "Dsus4":  { frets: [3,3,2,0,"x","x"] },
+  "Ddim":   { frets: [1,2,1,"x","x","x"] },
+  "Daug":   { frets: [2,3,3,0,"x","x"] },
+  "D9":     { frets: [2,1,2,0,"x","x"] },
+  "D11":    { frets: [0,1,2,0,"x","x"] },
+  "D7b5":   { frets: [2,1,2,1,"x","x"] },
+
+  /* ================= Eb ================= */
+  "Eb":     { frets: [3,4,3,1,1,"x"] },
+  "Ebm":    { frets: [2,4,3,1,1,"x"] },
+  "Ebm7":   { frets: [2,4,2,1,1,"x"] },
+  "Ebmaj7": { frets: [3,3,3,1,1,"x"] },
+  "Eb6":    { frets: [3,1,3,1,1,"x"] },
+  "Ebsus2": { frets: [1,4,3,1,1,"x"] },
+  "Ebsus4": { frets: [4,4,3,1,1,"x"] },
+  "Ebdim":  { frets: [2,3,2,"x","x","x"] },
+  "Ebaug":  { frets: [3,4,4,2,"x","x"] },
+  "Eb9":    { frets: [3,2,3,1,"x","x"] },
+  "Eb11":   { frets: [1,2,3,1,"x","x"] },
+  "Eb7b5":  { frets: [3,2,3,2,"x","x"] },
+
+  /* ================= E ================= */
+  "E":      { frets: [0,0,1,2,2,0] },
+  "Em":     { frets: [0,0,0,2,2,0] },
+  "Em7":    { frets: [0,0,0,0,2,0] },
+  "Emaj7":  { frets: [0,0,1,1,2,0] },
+  "E6":     { frets: [0,0,1,2,2,2] },
+  "Esus2":  { frets: [0,0,4,2,2,0] },
+  "Esus4":  { frets: [0,0,2,2,2,0] },
+  "Edim":   { frets: [0,1,2,1,"x","x"] },
+  "Eaug":   { frets: [0,1,1,2,3,"x"] },
+  "E9":     { frets: [0,0,1,0,2,0] },
+  "E11":    { frets: [0,0,0,0,2,0] },
+  "E7b5":   { frets: [0,1,1,0,2,0] },
+
+  /* ================= F ================= */
+  "F":      { frets: [1,1,2,3,3,1] },
+  "Fm":     { frets: [1,1,1,3,3,1] },
+  "Fm7":    { frets: [1,1,1,1,3,1] },
+  "Fmaj7":  { frets: [1,1,2,2,3,1] },
+  "F6":     { frets: [1,1,2,3,3,3] },
+  "Fsus2":  { frets: [1,1,3,3,3,1] },
+  "Fsus4":  { frets: [1,1,3,3,3,1] },
+  "Fdim":   { frets: [1,2,1,2,"x","x"] },
+  "Faug":   { frets: [2,2,2,3,4,"x"] },
+  "F9":     { frets: [1,1,2,1,3,1] },
+  "F11":    { frets: [1,1,1,1,3,1] },
+  "F7b5":   { frets: [1,2,2,1,3,1] },
+
+  /* ================= F# ================= */
+  "F#":      { frets: [2,2,3,4,4,2] },
+  "F#m":     { frets: [2,2,2,4,4,2] },
+  "F#m7":    { frets: [2,2,2,2,4,2] },
+  "F#maj7":  { frets: [2,2,3,3,4,2] },
+  "F#6":     { frets: [2,2,3,4,4,4] },
+  "F#sus2":  { frets: [2,2,4,4,4,2] },
+  "F#sus4":  { frets: [2,2,4,4,4,2] },
+  "F#dim":   { frets: [2,3,2,3,"x","x"] },
+  "F#aug":   { frets: [3,3,3,4,5,"x"] },
+  "F#9":     { frets: [2,2,3,2,4,2] },
+  "F#11":    { frets: [2,2,2,2,4,2] },
+  "F#7b5":   { frets: [2,3,3,2,4,2] },
+
+  /* ================= G ================= */
+  "G":      { frets: [3,0,0,0,2,3] },
+  "Gm":     { frets: [3,3,3,5,5,3] },
+  "Gm7":    { frets: [3,3,3,3,5,3] },
+  "Gmaj7":  { frets: [2,0,0,0,2,3] },
+  "G6":     { frets: [3,0,0,0,2,0] },
+  "Gsus2":  { frets: [3,0,0,0,0,3] },
+  "Gsus4":  { frets: [3,1,0,0,3,3] },
+  "Gdim":   { frets: [3,4,3,4,"x","x"] },
+  "Gaug":   { frets: [4,4,4,5,6,"x"] },
+  "G9":     { frets: [3,0,0,0,2,1] },
+  "G11":    { frets: [1,1,0,0,2,3] },
+  "G7b5":   { frets: [3,4,4,3,5,3] }
+
+};
+
+function drawChord() {
+    const chordName = document.getElementById("chordInput").value.trim();
+    const canvas = document.getElementById("chordCanvas");
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!chords[chordName]) {
+        ctx.fillStyle = "red";
+        ctx.font = "16px Arial";
+        ctx.fillText("Chord not found", 40, 150);
+        return;
+    }
+
+    const frets = chords[chordName].frets;
+
+    const startX = 50;   // nut position
+    const startY = 50;   // top string
+    const fretGap = 40;
+    const stringGap = 28;
+
+    const numFrets = 5;
+    const numStrings = 6;
+
+    /* ===== Title ===== */
+    ctx.fillStyle = "#000";
+    ctx.font = "20px Arial";
+    ctx.fillText(chordName, canvas.width / 2 - 12, 28);
+
+    /* ===== Strings (horizontal) ===== */
+    for (let s = 0; s < numStrings; s++) {
+        const y = startY + s * stringGap;
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(startX + fretGap * numFrets, y);
+        ctx.stroke();
+    }
+
+    /* ===== Frets (vertical, left → right) ===== */
+    for (let f = 0; f <= numFrets; f++) {
+        const x = startX + f * fretGap;
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, startY + stringGap * (numStrings - 1));
+        ctx.stroke();
+    }
+
+    /* ===== Nut (LEFT) ===== */
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX, startY + stringGap * (numStrings - 1));
+    ctx.stroke();
+    ctx.lineWidth = 1;
+
+    /* ===== Markers ===== */
+    frets.forEach((fret, stringIndex) => {
+
+        // High e at top, low E at bottom
+        const y = startY + stringIndex * stringGap;
+
+        if (fret === "x") {
+            ctx.fillText("X", startX - 20, y + 4);
+        }
+        else if (fret === 0) {
+            ctx.fillText("O", startX - 20, y + 4);
+        }
+        else {
+            const x = startX + (fret - 0.5) * fretGap;
+            ctx.beginPath();
+            ctx.arc(x, y, 7, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+}
+document.getElementById("chordInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        drawChord();
+    }
+});
+</script>
+
+</body>
+</html>
